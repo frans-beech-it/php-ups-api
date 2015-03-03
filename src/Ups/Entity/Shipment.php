@@ -51,6 +51,11 @@ class Shipment
     private $shipFrom;
 
     /**
+     * @var SoldTo
+     */
+    private $soldTo;
+
+    /**
      * @var Service
      */
     private $service;
@@ -65,6 +70,16 @@ class Shipment
      */
     private $shipmentServiceOptions;
 
+    /**
+     * @var bool
+     */
+    private $goodsNotInFreeCirculationIndicator = FALSE;
+
+    /**
+     * @var \stdClass
+     */
+    protected $itemizedPaymentInformation;
+
     public function __construct()
     {
         $this->setShipper(new Shipper());
@@ -73,6 +88,21 @@ class Shipment
         $this->setShipmentServiceOptions(new ShipmentServiceOptions());
         $this->setService(new Service());
         $this->rateInformation = null;
+    }
+
+    /**
+     * Fallback for deprecated public properties
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        if (method_exists($this, 'get' . $name)) {
+            return call_user_func(array($this, 'get' . $name));
+        } else {
+            return NULL;
+        }
     }
 
     /**
@@ -183,6 +213,24 @@ class Shipment
     }
 
     /**
+     * @return SoldTo
+     */
+    public function getSoldTo()
+    {
+        return $this->soldTo;
+    }
+
+    /**
+     * @param SoldTo $soldTo
+     * @return $this
+     */
+    public function setSoldTo(SoldTo $soldTo)
+    {
+        $this->soldTo = $soldTo;
+        return $this;
+    }
+
+    /**
      * @return ShipmentServiceOptions
      */
     public function getShipmentServiceOptions()
@@ -242,7 +290,8 @@ class Shipment
     /**
      * If called, returned prices will include negotiated rates (discounts will be applied)
      */
-    public function showNegotiatedRates() {
+    public function showNegotiatedRates()
+    {
         $this->rateInformation = new RateInformation();
         $this->rateInformation->setNegotiatedRatesIndicator(true);
     }
@@ -250,7 +299,48 @@ class Shipment
     /**
      * @return null|RateInformation
      */
-    public function getRateInformation() {
+    public function getRateInformation()
+    {
         return $this->rateInformation;
+    }
+
+    /**
+     * Get goodsNotInFreeCirculationIndicator
+     *
+     * @return boolean
+     */
+    public function getGoodsNotInFreeCirculationIndicator()
+    {
+        return $this->goodsNotInFreeCirculationIndicator;
+    }
+
+    /**
+     * Set goodsNotInFreeCirculationIndicator
+     *
+     * @param boolean $goodsNotInFreeCirculationIndicator
+     */
+    public function setGoodsNotInFreeCirculationIndicator($goodsNotInFreeCirculationIndicator)
+    {
+        $this->goodsNotInFreeCirculationIndicator = $goodsNotInFreeCirculationIndicator;
+    }
+
+    /**
+     * Get itemizedPaymentInformation
+     *
+     * @return \stdClass
+     */
+    public function getItemizedPaymentInformation()
+    {
+        return $this->itemizedPaymentInformation;
+    }
+
+    /**
+     * Set itemizedPaymentInformation
+     *
+     * @param \stdClass $itemizedPaymentInformation
+     */
+    public function setItemizedPaymentInformation($itemizedPaymentInformation)
+    {
+        $this->itemizedPaymentInformation = $itemizedPaymentInformation;
     }
 }
