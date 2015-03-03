@@ -173,7 +173,7 @@ abstract class Ups
      * @param string $segment The URL segment to build in to the endpoint
      * @return string
      */
-    protected function compileEndpointUrl($segment)
+    protected function compileEndpointUrl($segment = '')
     {
         $base = ($this->useIntegration ? $this->integrationBaseUrl : $this->productionBaseUrl);
 

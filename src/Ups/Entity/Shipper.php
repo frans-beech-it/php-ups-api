@@ -5,29 +5,18 @@ use DOMDocument;
 use DOMElement;
 use Ups\NodeInterface;
 
-class Shipper implements NodeInterface
+class Shipper extends AbstractToArray implements NodeInterface
 {
-    /** @deprecated */
-    public $Name;
-    /** @deprecated */
-    public $AttentionName;
-    /** @deprecated */
-    public $TaxIdentificationNumber;
-    /** @deprecated */
-    public $PhoneNumber;
-    /** @deprecated */
-    public $FaxNumber;
-    /** @deprecated */
-    public $ShipperNumber;
-    /** @deprecated */
-    public $EMailAddress;
-    /** @deprecated */
-    public $Address;
 
     /**
      * @var string
      */
     protected $name;
+
+    /**
+     * @var string
+     */
+    protected $companyName;
 
     /**
      * @var string
@@ -65,15 +54,28 @@ class Shipper implements NodeInterface
     protected $address;
 
     /**
+     * @var Account
+     */
+    protected $account;
+
+    /**
+     * @var ChargeCard
+     */
+    protected $chargeCard;
+
+    /**
      * @param null|object $attributes
      */
-    public function __construct($attributes = null)
+    public function __construct($attributes = NULL)
     {
         $this->address = new Address();
 
-        if (null !== $attributes) {
+        if (NULL !== $attributes) {
             if (isset($attributes->Name)) {
                 $this->setName($attributes->Name);
+            }
+            if (isset($attributes->CompanyName)) {
+                $this->setCompanyName($attributes->CompanyName);
             }
             if (isset($attributes->AttentionName)) {
                 $this->setAttentionName($attributes->AttentionName);
@@ -100,25 +102,65 @@ class Shipper implements NodeInterface
     }
 
     /**
+     * Fallback for deprecated public properties
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        if (method_exists($this, 'get' . $name)) {
+            return call_user_func(array($this, 'get' . $name));
+        } else {
+            return NULL;
+        }
+    }
+
+    /**
      * @param null|DOMDocument $document
      * @return DOMElement
      */
-    public function toNode(DOMDocument $document = null)
+    public function toNode(DOMDocument $document = NULL)
     {
-        if (null === $document) {
+        if (NULL === $document) {
             $document = new DOMDocument();
         }
 
         $node = $document->createElement('Shipper');
 
-        $shipperNumber = $this->getShipperNumber();
-        if (isset($shipperNumber)) {
-            $node->appendChild($document->createElement('ShipperNumber', $shipperNumber));
+        $node->appendChild($document->createElement('Name', $this->name));
+
+        if ($this->getAttentionName()) {
+            $node->appendChild($document->createElement('AttentionName', $this->getAttentionName()));
         }
 
-        $address = $this->getAddress();
-        if (isset($address)) {
-            $node->appendChild($address->toNode($document));
+        if ($this->getCompanyName()) {
+            $node->appendChild($document->createElement('CompanyDisplayableName', $this->getCompanyName()));
+        }
+
+        $node->appendChild($document->createElement('ShipperNumber', $this->shipperNumber));
+
+        if ($this->getTaxIdentificationNumber()) {
+            $node->appendChild($document->createElement('TaxIdentificationNumber', $this->getTaxIdentificationNumber()));
+        }
+
+        if ($this->phoneNumber) {
+            $node->appendChild($document->createElement('PhoneNumber', $this->phoneNumber));
+        }
+
+        if ($this->faxNumber) {
+            $node->appendChild($document->createElement('FaxNumber', $this->faxNumber));
+        }
+
+        if ($this->emailAddress) {
+            $node->appendChild($document->createElement('EmailAddress', $this->emailAddress));
+        }
+
+        if ($this->address) {
+            $node->appendChild($this->address->toNode($document));
+        }
+        if ($this->account) {
+            $node->appendChild($this->account->toNode($document));
         }
 
         return $node;
@@ -138,7 +180,6 @@ class Shipper implements NodeInterface
      */
     public function setAddress(Address $address)
     {
-        $this->Address = $address;
         $this->address = $address;
         return $this;
     }
@@ -157,7 +198,6 @@ class Shipper implements NodeInterface
      */
     public function setAttentionName($attentionName)
     {
-        $this->AttentionName = $attentionName;
         $this->attentionName = $attentionName;
         return $this;
     }
@@ -176,7 +216,6 @@ class Shipper implements NodeInterface
      */
     public function setEmailAddress($emailAddress)
     {
-        $this->EMailAddress = $emailAddress;
         $this->emailAddress = $emailAddress;
         return $this;
     }
@@ -195,7 +234,6 @@ class Shipper implements NodeInterface
      */
     public function setFaxNumber($faxNumber)
     {
-        $this->FaxNumber = $faxNumber;
         $this->faxNumber = $faxNumber;
         return $this;
     }
@@ -214,8 +252,25 @@ class Shipper implements NodeInterface
      */
     public function setName($name)
     {
-        $this->Name = $name;
         $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCompanyName()
+    {
+        return $this->companyName;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setCompanyName($name)
+    {
+        $this->companyName = $name;
         return $this;
     }
 
@@ -233,7 +288,6 @@ class Shipper implements NodeInterface
      */
     public function setPhoneNumber($phoneNumber)
     {
-        $this->PhoneNumber = $phoneNumber;
         $this->phoneNumber = $phoneNumber;
         return $this;
     }
@@ -252,7 +306,6 @@ class Shipper implements NodeInterface
      */
     public function setShipperNumber($shipperNumber)
     {
-        $this->ShipperNumber = $shipperNumber;
         $this->shipperNumber = $shipperNumber;
         return $this;
     }
@@ -271,8 +324,48 @@ class Shipper implements NodeInterface
      */
     public function setTaxIdentificationNumber($taxIdentificationNumber)
     {
-        $this->TaxIdentificationNumber = $taxIdentificationNumber;
         $this->taxIdentificationNumber = $taxIdentificationNumber;
         return $this;
     }
+
+    /**
+     * Get account
+     *
+     * @return Account
+     */
+    public function getAccount()
+    {
+        return $this->account;
+    }
+
+    /**
+     * Set account
+     *
+     * @param Account $account
+     */
+    public function setAccount($account)
+    {
+        $this->account = $account;
+    }
+
+    /**
+     * Get chargeCard
+     *
+     * @return ChargeCard
+     */
+    public function getChargeCard()
+    {
+        return $this->chargeCard;
+    }
+
+    /**
+     * Set chargeCard
+     *
+     * @param ChargeCard $chargeCard
+     */
+    public function setChargeCard($chargeCard)
+    {
+        $this->chargeCard = $chargeCard;
+    }
+
 }
