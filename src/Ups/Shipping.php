@@ -281,8 +281,8 @@ class Shipping extends Ups
             $node->appendChild($xml->createElement('MonetaryValue', $shipment->InvoiceLineTotal->MonetaryValue));
         }
 
-        if (isset($shipment->NumOfPiecesInShipment)) {
-            $shipmentNode->appendChild($xml->createElement('NumOfPiecesInShipment', $shipment->NumOfPiecesInShipment));
+        if ($shipment->getNumOfPiecesInShipment()) {
+            $shipmentNode->appendChild($xml->createElement('NumOfPiecesInShipment', $shipment->getNumOfPiecesInShipment()));
         }
 
         if (isset($shipment->RateInformation)) {

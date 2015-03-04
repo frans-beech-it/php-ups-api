@@ -66,6 +66,11 @@ class Shipment
     private $packages = array();
 
     /**
+     * @var int
+     */
+    protected $numOfPiecesInShipment = 0;
+
+    /**
      * @var ShipmentServiceOptions
      */
     private $shipmentServiceOptions;
@@ -342,5 +347,25 @@ class Shipment
     public function setItemizedPaymentInformation($itemizedPaymentInformation)
     {
         $this->itemizedPaymentInformation = $itemizedPaymentInformation;
+    }
+
+    /**
+     * Get numOfPiecesInShipment
+     *
+     * @return int
+     */
+    public function getNumOfPiecesInShipment()
+    {
+        return $this->numOfPiecesInShipment;
+    }
+
+    /**
+     * Set numOfPiecesInShipment
+     *
+     * @param int $numOfPiecesInShipment
+     */
+    public function setNumOfPiecesInShipment($numOfPiecesInShipment)
+    {
+        $this->numOfPiecesInShipment = $numOfPiecesInShipment;
     }
 }
