@@ -193,7 +193,7 @@ class SoapRequest
         if (!$this->logPath) {
             return;
         }
-        $logFileName = date('YmdHis') . '-' . ($success ? 'OK' : 'FAILED') . uniqid() . '.xml';
+        $logFileName = date('YmdHis') . '-' . ($success ? 'OK' : 'FAILED') . uniqid('-') . '.xml';
         file_put_contents($this->logPath . $logFileName, $this->endPointUrl . PHP_EOL . $client->__getLastRequestHeaders() . $client->__getLastRequest() . $client->__getLastResponseHeaders() . $client->__getLastResponse());
     }
 }

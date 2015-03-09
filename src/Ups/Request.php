@@ -97,7 +97,7 @@ class Request implements RequestInterface
                 $this->logLevel === self::LOG_ALL_REQUESTS
                 || ($failed && $this->logLevel === self::LOG_FAILED_REQUESTS)
             ) {
-                $logFileName = date('YmdHis') . '-' . ($failed ? 'FAILED' : 'OK') . uniqid() . '.xml';
+                $logFileName = date('YmdHis') . '-' . ($failed ? 'FAILED' : 'OK') . uniqid('-') . '.xml';
                 file_put_contents($this->logPath . $logFileName, $this->getEndpointUrl() . PHP_EOL .$this->getAccess() . $this->getRequest(). $raw_response);
             }
         }
