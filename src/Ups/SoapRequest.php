@@ -33,6 +33,20 @@ class SoapRequest
     protected $access = '';
 
     /**
+     * Log level
+     *
+     * @var int
+     */
+    protected $logLevel = Request::LOG_NONE;
+
+    /**
+     * Log path (where so save logged requests)
+     *
+     * @var string
+     */
+    protected $logPath = NULL;
+
+    /**
      * Set username
      *
      * @param string $username
@@ -83,6 +97,46 @@ class SoapRequest
     }
 
     /**
+     * Get logLevel
+     *
+     * @return int
+     */
+    public function getLogLevel()
+    {
+        return $this->logLevel;
+    }
+
+    /**
+     * Set logLevel
+     *
+     * @param int $logLevel
+     */
+    public function setLogLevel($logLevel)
+    {
+        $this->logLevel = $logLevel;
+    }
+
+    /**
+     * Get logPath
+     *
+     * @return string
+     */
+    public function getLogPath()
+    {
+        return $this->logPath;
+    }
+
+    /**
+     * Set logPath
+     *
+     * @param string $logPath
+     */
+    public function setLogPath($logPath)
+    {
+        $this->logPath = $logPath;
+    }
+
+    /**
      * @param string $operation
      * @param array $data
      * @return \stdClass
@@ -115,6 +169,31 @@ class SoapRequest
         );
         $client->__setSoapHeaders($header);
 
-        return $client->__soapCall($operation, array($data));
+        try {
+            $response = $client->__soapCall($operation, array($data));
+        } catch (\SoapFault $e) {
+            $this->logRequest($client, FALSE);
+            throw $e;
+        }
+        $this->logRequest($client);
+        return $response;
+    }
+
+    /**
+     * Log request
+     *
+     * @param \SoapClient $client
+     * @param $success
+     */
+    protected function logRequest(\SoapClient $client, $success = TRUE)
+    {
+        if ($this->logLevel <= 0 || ($this->logLevel === Request::LOG_FAILED_REQUESTS && $success)) {
+            return;
+        }
+        if (!$this->logPath) {
+            return;
+        }
+        $logFileName = date('YmdHis') . '-' . ($success ? 'OK' : 'FAILED') . uniqid() . '.xml';
+        file_put_contents($this->logPath . $logFileName, $this->endPointUrl . PHP_EOL . $client->__getLastRequestHeaders() . $client->__getLastRequest() . $client->__getLastResponseHeaders() . $client->__getLastResponse());
     }
 }

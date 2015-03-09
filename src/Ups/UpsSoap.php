@@ -44,6 +44,8 @@ class UpsSoap extends Ups
         $requestInstance->setPassword($this->password);
         $requestInstance->setEndPointUrl($this->compileEndpointUrl());
         $requestInstance->setWsdl($this->wsdlBaseUrl . $this->wsdl . '.wsdl');
+        $requestInstance->setLogLevel($this->logLevel);
+        $requestInstance->setLogPath($this->logPath);
 
         try {
             $response = $requestInstance->request($operation, $data);

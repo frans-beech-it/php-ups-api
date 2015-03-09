@@ -133,6 +133,8 @@ class Tracking extends Ups
     {
         if (null === $this->request) {
             $this->request = new Request;
+            $this->request->setLogLevel($this->logLevel);
+            $this->request->setLogPath($this->logPath);
         }
         return $this->request;
     }

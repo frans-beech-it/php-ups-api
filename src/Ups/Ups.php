@@ -54,6 +54,20 @@ abstract class Ups
     public $response;
 
     /**
+     * Log level
+     *
+     * @var int
+     */
+    protected $logLevel = Request::LOG_NONE;
+
+    /**
+     * Log path (where so save logged requests)
+     *
+     * @var string
+     */
+    protected $logPath = NULL;
+
+    /**
      * Constructor
      *
      * @param string|null $accessKey UPS License Access Key
@@ -147,6 +161,8 @@ abstract class Ups
     protected function request($access, $request, $endpointurl)
     {
         $requestInstance = new Request;
+        $requestInstance->setLogLevel($this->logLevel);
+        $requestInstance->setLogPath($this->logPath);
         $response = $requestInstance->request($access, $request, $endpointurl);
         if ($response->getResponse() instanceof SimpleXMLElement) {
             $this->response = $response->getResponse();
@@ -178,5 +194,45 @@ abstract class Ups
         $base = ($this->useIntegration ? $this->integrationBaseUrl : $this->productionBaseUrl);
 
         return $base . $segment;
+    }
+
+    /**
+     * Get logPath
+     *
+     * @return string
+     */
+    public function getLogPath()
+    {
+        return $this->logPath;
+    }
+
+    /**
+     * Set logPath
+     *
+     * @param string $logPath
+     */
+    public function setLogPath($logPath)
+    {
+        $this->logPath = $logPath;
+    }
+
+    /**
+     * Get logLevel
+     *
+     * @return int
+     */
+    public function getLogLevel()
+    {
+        return $this->logLevel;
+    }
+
+    /**
+     * Set logLevel
+     *
+     * @param int $logLevel
+     */
+    public function setLogLevel($logLevel)
+    {
+        $this->logLevel = $logLevel;
     }
 }

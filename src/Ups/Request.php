@@ -6,6 +6,11 @@ use Exception;
 
 class Request implements RequestInterface
 {
+
+    const LOG_NONE = 0;
+    const LOG_FAILED_REQUESTS = 1;
+    const LOG_ALL_REQUESTS = 2;
+
     /**
      * @var string
      */
@@ -20,6 +25,20 @@ class Request implements RequestInterface
      * @var string
      */
     protected $endpointUrl;
+
+    /**
+     * Log level
+     *
+     * @var int
+     */
+    protected $logLevel = self::LOG_NONE;
+
+    /**
+     * Log path (where so save logged requests)
+     *
+     * @var string
+     */
+    protected $logPath = NULL;
 
     /**
      * Send request to UPS
@@ -52,19 +71,41 @@ class Request implements RequestInterface
             throw new Exception("Failure: Connection to Endpoint URL failed.");
         }
 
-        $response = stream_get_contents($handle);
+        $raw_response = stream_get_contents($handle);
         fclose($handle);
 
-        if ($response != false) {
-            $text = $response;
-            $response = new SimpleXMLElement($response);
+        $result = NULL;
+        if ($raw_response != false) {
+            $text = $raw_response;
+            $response = new SimpleXMLElement($raw_response);
             if (isset($response->Response) && isset($response->Response->ResponseStatusCode)) {
                 $responseInstance = new Response;
-                return $responseInstance->setText($text)->setResponse($response);
+                $result = $responseInstance->setText($text)->setResponse($response);
             }
         }
 
-        throw new Exception("Failure: Response is invalid.");
+        if ($this->logLevel > 0 && $this->logPath) {
+            $failed = ($result === NULL ? TRUE : FALSE);
+            if (!$failed && !$response instanceof SimpleXMLElement) {
+                $failed = TRUE;
+            }
+            if (!$failed && $response->Response->ResponseStatusCode == 0) {
+                $failed = TRUE;
+            }
+
+            if (
+                $this->logLevel === self::LOG_ALL_REQUESTS
+                || ($failed && $this->logLevel === self::LOG_FAILED_REQUESTS)
+            ) {
+                $logFileName = date('YmdHis') . '-' . ($failed ? 'FAILED' : 'OK') . uniqid() . '.xml';
+                file_put_contents($this->logPath . $logFileName, $this->getEndpointUrl() . PHP_EOL .$this->getAccess() . $this->getRequest(). $raw_response);
+            }
+        }
+
+        if ($result === NULL) {
+            throw new Exception("Failure: Response is invalid.");
+        }
+        return $result;
     }
 
     /**
@@ -119,5 +160,45 @@ class Request implements RequestInterface
     public function getEndpointUrl()
     {
         return $this->endpointUrl;
+    }
+
+    /**
+     * Get logLevel
+     *
+     * @return int
+     */
+    public function getLogLevel()
+    {
+        return $this->logLevel;
+    }
+
+    /**
+     * Set logLevel
+     *
+     * @param int $logLevel
+     */
+    public function setLogLevel($logLevel)
+    {
+        $this->logLevel = $logLevel;
+    }
+
+    /**
+     * Get logPath
+     *
+     * @return string
+     */
+    public function getLogPath()
+    {
+        return $this->logPath;
+    }
+
+    /**
+     * Set logPath
+     *
+     * @param string $logPath
+     */
+    public function setLogPath($logPath)
+    {
+        $this->logPath = $logPath;
     }
 }
